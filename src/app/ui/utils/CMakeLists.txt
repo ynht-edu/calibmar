@@ -8,6 +8,7 @@ target_sources(calibmar_app PRIVATE
 	files_calibration_runner.cpp
 	files_calibration_runner.h
 	heatmap.cpp
+	camera_import_dialog.h
 	heatmap.h
 	housing_diagram.cpp
 	housing_diagram.h

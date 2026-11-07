@@ -1,4 +1,5 @@
 #include "file_calibration_dialog.h"
+#include "ui/utils/camera_import_dialog.h"
 
 #include <calibmar/core/report.h>
 #include <colmap/util/misc.h>
@@ -85,8 +86,19 @@ namespace calibmar {
 
   void FileCalibrationDialog::ImportParameters() {
     std::string path =
-        QFileDialog::getOpenFileName(this, "Import Parameters", QString(), "Calibration YAML (*.yaml *.yml)").toStdString();
+        QFileDialog::getOpenFileName(this, "Import Parameters", QString(), "Calibration YAML (calibmar, Kalibr, ROS, OpenCV, ORB-SLAM3) (*.yaml *.yml)").toStdString();
     if (path.empty()) {
+      return;
+    }
+
+    if (camera_import::IsSupportedFile(path)) {
+      std::optional<camera_import::ImportedCamera> camera = SelectImportedCamera(this, path);
+      if (camera.has_value()) {
+        Options options = GetOptions();
+        options.camera_model = camera->camera_model;
+        options.initial_camera_parameters = camera->params;
+        SetOptions(options);
+      }
       return;
     }
 
@@ -104,14 +116,14 @@ namespace calibmar {
         break;
       case CalibrationTargetType::ArucoGridBoard:
         options.calibration_target_options = ArucoBoardFeatureExtractor::Options{p.aruco_type,
-                                                                                 ArucoGridOrigin::TopLeft,
-                                                                                 ArucoGridDirection::Horizontal,
+                                                                                 p.grid_origin,
+                                                                                 p.grid_direction,
                                                                                  0,
                                                                                  p.columns,
                                                                                  p.rows,
                                                                                  p.square_size,
                                                                                  p.spacing,
-                                                                                 1};
+                                                                                 p.border_bits};
         break;
     }
 

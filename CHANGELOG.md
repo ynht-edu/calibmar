@@ -6,6 +6,12 @@
 
 - Kalibr AprilGrid support for marker grid boards: layout preset and `target.yaml` import
 - `calibmar_cli` for calibrating from an image directory and a Kalibr AprilGrid `target.yaml` without the GUI
+- Import in-air intrinsics from Kalibr `camchain.yaml`/`camchain-imucam.yaml`, ROS `camera_info`, OpenCV and ORB-SLAM3 yaml files in all import dialogs and `calibmar_cli --intrinsics`
+- `calibmar_cli --housing` for flat and dome port calibration with fixed in-air intrinsics
+
+### Bugfixes
+
+- Importing a marker grid board calibration now keeps its board origin, ID direction and border bits
 
 ## 1.1.0
 

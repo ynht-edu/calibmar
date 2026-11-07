@@ -1,4 +1,5 @@
 #include "stereo_file_calibration_dialog.h"
+#include "ui/utils/camera_import_dialog.h"
 
 #include "ui/utils/parse_params.h"
 #include <calibmar/core/report.h>
@@ -222,8 +223,20 @@ namespace calibmar {
 
   void StereoFileCalibrationDialog::ImportParameters(int camera) {
     std::string path =
-        QFileDialog::getOpenFileName(this, "Import Parameters", QString(), "Calibration YAML (*.yaml *.yml)").toStdString();
+        QFileDialog::getOpenFileName(this, "Import Parameters", QString(), "Calibration YAML (calibmar, Kalibr, ROS, OpenCV, ORB-SLAM3) (*.yaml *.yml)").toStdString();
     if (path.empty()) {
+      return;
+    }
+
+    if (camera_import::IsSupportedFile(path)) {
+      std::optional<camera_import::ImportedCamera> imported_camera = SelectImportedCamera(this, path, camera);
+      if (imported_camera.has_value()) {
+        CameraModelWidget* model = camera == 0 ? camera_model1_ : camera_model2_;
+        model->SetCameraModel(imported_camera->camera_model);
+        (camera == 0 ? initial_parameters_1_ : initial_parameters_2_)
+            ->SetInitialParameters(ConvertInitialParameters(imported_camera->params));
+        (camera == 0 ? use_initial_parameters_checkbox1_ : use_initial_parameters_checkbox2_)->setChecked(true);
+      }
       return;
     }
 
@@ -249,14 +262,14 @@ namespace calibmar {
         break;
       case CalibrationTargetType::ArucoGridBoard:
         target_options = ArucoBoardFeatureExtractor::Options{parameters.aruco_type,
-                                                             ArucoGridOrigin::TopLeft,
-                                                             ArucoGridDirection::Horizontal,
+                                                             parameters.grid_origin,
+                                                             parameters.grid_direction,
                                                              0,
                                                              parameters.columns,
                                                              parameters.rows,
                                                              parameters.square_size,
                                                              parameters.spacing,
-                                                             1};
+                                                             parameters.border_bits};
         break;
     }
 

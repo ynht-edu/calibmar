@@ -1,4 +1,5 @@
 #include "undistortion_dialog.h"
+#include "ui/utils/camera_import_dialog.h"
 
 #include "calibmar/core/report.h"
 #include "calibmar/core/undistort.h"
@@ -98,8 +99,17 @@ namespace calibmar {
 
   void UndistortionDialog::ImportParameters() {
     std::string path =
-        QFileDialog::getOpenFileName(this, "Import Parameters", QString(), "Calibration YAML (*.yaml *.yml)").toStdString();
+        QFileDialog::getOpenFileName(this, "Import Parameters", QString(), "Calibration YAML (calibmar, Kalibr, ROS, OpenCV, ORB-SLAM3) (*.yaml *.yml)").toStdString();
     if (path.empty()) {
+      return;
+    }
+
+    if (camera_import::IsSupportedFile(path)) {
+      std::optional<camera_import::ImportedCamera> camera = SelectImportedCamera(this, path);
+      if (camera.has_value()) {
+        camera_model_edit_->SetCameraModel(camera->camera_model);
+        camera_model_edit_->SetInitialCameraParameters(camera->params);
+      }
       return;
     }
 
