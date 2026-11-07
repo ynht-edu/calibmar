@@ -1,5 +1,6 @@
 
 #include "ui/widgets/aruco_board_target_widget.h"
+#include "calibmar/extractors/aprilgrid.h"
 
 namespace calibmar {
 
@@ -56,7 +57,24 @@ namespace calibmar {
     spacing_size_edit_->setRange(0.001, 1000);
     spacing_size_edit_->setSingleStep(0.001);
     spacing_size_edit_->setValue(1.0);
+    spacing_size_edit_->setToolTip("Absolute gap between markers. For a Kalibr AprilGrid this is tagSize * tagSpacing.");
+
+    QLabel* preset_label = new QLabel("Kalibr AprilGrid", this);
+    QPushButton* aprilgrid_preset_button = new QPushButton("Apply Layout", this);
+    aprilgrid_preset_button->setToolTip(
+        "Set AprilTag 36h11, 2 border bits, bottom left origin and horizontal IDs.\n"
+        "Columns, rows, size and spacing are kept.");
+    connect(aprilgrid_preset_button, &QPushButton::released, this, &ArucoBoardTargetOptionsWidget::ApplyKalibrAprilGridLayout);
+    QPushButton* aprilgrid_yaml_button = new QPushButton("Load target.yaml...", this);
+    aprilgrid_yaml_button->setToolTip("Import a Kalibr aprilgrid target yaml (tagCols, tagRows, tagSize, tagSpacing).");
+    connect(aprilgrid_yaml_button, &QPushButton::released, this, &ArucoBoardTargetOptionsWidget::LoadKalibrTargetYaml);
+    QHBoxLayout* preset_layout = new QHBoxLayout();
+    preset_layout->addWidget(aprilgrid_preset_button);
+    preset_layout->addWidget(aprilgrid_yaml_button);
+
     QFormLayout* formLayout = new QFormLayout(this);
+    formLayout->setWidget(0, QFormLayout::LabelRole, preset_label);
+    formLayout->setLayout(0, QFormLayout::FieldRole, preset_layout);
     formLayout->setWidget(1, QFormLayout::LabelRole, aruco_type_label);
     formLayout->setWidget(1, QFormLayout::FieldRole, aruco_type_edit_);
     formLayout->setWidget(2, QFormLayout::LabelRole, aruco_border_label);
@@ -155,5 +173,25 @@ namespace calibmar {
     }
 
     return options;
+  }
+
+  void ArucoBoardTargetOptionsWidget::ApplyKalibrAprilGridLayout() {
+    ArucoBoardFeatureExtractor::Options options = ArucoBoardTargetOptions();
+    aprilgrid::ApplyKalibrLayout(options);
+    SetArucoBoardTargetOptions(options);
+  }
+
+  void ArucoBoardTargetOptionsWidget::LoadKalibrTargetYaml() {
+    QString path = QFileDialog::getOpenFileName(this, "Kalibr AprilGrid target", QString(), "YAML (*.yaml *.yml);;All files (*)");
+    if (path.isEmpty()) {
+      return;
+    }
+
+    try {
+      SetArucoBoardTargetOptions(aprilgrid::ToArucoBoardOptions(aprilgrid::ReadKalibrTargetYaml(path.toStdString())));
+    }
+    catch (const std::exception& ex) {
+      QMessageBox::warning(this, "Kalibr AprilGrid", QString::fromStdString(ex.what()));
+    }
   }
 }

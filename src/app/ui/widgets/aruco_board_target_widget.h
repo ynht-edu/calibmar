@@ -14,6 +14,9 @@ namespace calibmar {
     ArucoBoardFeatureExtractor::Options ArucoBoardTargetOptions();
 
    private:
+    void ApplyKalibrAprilGridLayout();
+    void LoadKalibrTargetYaml();
+
     QComboBox* aruco_type_edit_;
     QSpinBox* aruco_border_edit_;
     QSpinBox* rows_edit_;

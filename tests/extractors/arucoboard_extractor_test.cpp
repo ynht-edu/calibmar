@@ -52,9 +52,10 @@ BOOST_AUTO_TEST_CASE(AprilTagArucoBoardExtraction) {
   options.marker_cols = 6;
   options.marker_rows = 6;
   options.marker_size = 1;
-  options.marker_spacing = 0.05;
+  options.marker_spacing = 0.3;
   options.border_bits = 2;
   options.aruco_type = ArucoMarkerTypes::DICT_APRILTAG_36h11;
+  options.grid_origin = ArucoGridOrigin::BottomLeft;
 
   MemoryImageReader reader({MemoryImageReader::Images::AprilGridBoard});
   ArucoBoardFeatureExtractor extractor(options);

@@ -26,6 +26,20 @@ The main advantage of the marker grid board is the ability to also use partials 
 An ArUco (`4x4` marker type) Grid Board, with three rows, two columns, bottom left board origin and horizontally ascending IDs starting with zero.
 ```
 
+### Kalibr AprilGrid
+
+[Kalibr](https://github.com/ethz-asl/kalibr/wiki/calibration-targets) AprilGrids are marker grid boards with AprilTag `36h11` markers, a 2 bit marker border, tag 0 at the bottom left and IDs ascending horizontally. Use `Apply Layout` next to `Kalibr AprilGrid` to set these values, or `Load target.yaml...` to import a Kalibr target file directly:
+
+```yaml
+target_type: 'aprilgrid'
+tagCols: 6
+tagRows: 6
+tagSize: 0.088    # Marker Size
+tagSpacing: 0.3   # Marker Spacing = tagSize * tagSpacing
+```
+
+Note that Kalibr's `tagSpacing` is a ratio, while `Marker Spacing` is absolute. The board origin must be `Bottom Left`, otherwise the board model is mirrored and the calibration will fail or be wrong.
+
 ## Auto Calibration Target (3D Target)
 
 This target allows calibrating from SIFT features. It is extremely flexible, the only requirement being that images display a rigid scene (or target) with detectable SIFT features. If marker detection is enabled, the marker will be used in conjunction with the 'mask factor' to only use features close to the marker and mask out everything else. This enables the use of a target which can be moved in front of the camera without disturbing the calibration with features which do not belong to the target (i.e. a moving person or background). If a texture is used which produces a large amount of densely spaced SIFT features (e.g. [this one](https://doi.org/10.1109/IROS.2013.6696517)) a few images can generate a very large amount of constraints over the whole image space allowing a fast and precise calibration. The downside of SIFT features is that they are potentially less precisely localizable as e.g. checkerboard corners. If the `Enable Aruco Detection` checkbox is disabled this mode is essentially SfM auto calibration based on the [COLMAP](https://github.com/colmap/colmap)/[Refractive COLMAP](https://github.com/MDSKiel/colmap_underwater) implementation. 

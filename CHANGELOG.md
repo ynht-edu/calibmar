@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### New Features
+
+- Kalibr AprilGrid support for marker grid boards: layout preset and `target.yaml` import
+
 ## 1.1.0
 
 ### New Features
