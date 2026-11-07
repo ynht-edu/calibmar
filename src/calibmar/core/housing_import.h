@@ -14,9 +14,9 @@ namespace calibmar {
   //   center: [0, 0, 0]        # dome: initial dome center offset (optimized)
   //   radius: 0.05             # dome: inner radius
   //   thickness: 0.01          # interface thickness
-  //   glass: acrylic           # acrylic, glass, borosilicate, polycarbonate, sapphire or a refractive index
-  //   water: sea               # fresh, sea or a refractive index
-  //   air: 1.0                 # optional
+  //   glass: 1.49              # refractive index of the interface
+  //   water: 1.339             # refractive index of the water
+  //   air: 1.0                 # optional, refractive index inside the housing
   //
   // Also accepted: 'housing' with a raw 'parameters' list, or a calibmar calibration yaml
   // (non_svp_model, non_svp_parameters) to start from a previous housing calibration.
@@ -28,7 +28,5 @@ namespace calibmar {
 
     ImportedHousing ParseHousing(const std::string& content);
     ImportedHousing ReadHousing(const std::string& path);
-
-    double RefractiveIndex(const std::string& material);
   }
 }

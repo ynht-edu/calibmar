@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
-#include <map>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -34,7 +33,11 @@ namespace {
       }
       throw std::runtime_error("Housing yaml is missing '" + key + "'");
     }
-    return housing_import::RefractiveIndex(Text(values, key));
+    double value = Number(values, key);
+    if (value < 1.0 || value > 3.0) {
+      throw std::runtime_error("Housing '" + key + "' = " + Text(values, key) + " is not a refractive index (1.0 - 3.0)");
+    }
+    return value;
   }
 
   double Length(const Values& values, const std::string& key, std::optional<double> fallback = {}) {
@@ -82,30 +85,6 @@ namespace {
 
 namespace calibmar {
   namespace housing_import {
-    double RefractiveIndex(const std::string& material) {
-      // approximate values in the visible range
-      static const std::map<std::string, double> indices{
-          {"air", 1.0},           {"fresh", 1.333},        {"freshwater", 1.333},   {"fresh_water", 1.333},
-          {"sea", 1.339},         {"seawater", 1.339},     {"sea_water", 1.339},    {"salt", 1.339},
-          {"acrylic", 1.49},      {"pmma", 1.49},          {"glass", 1.52},         {"bk7", 1.517},
-          {"borosilicate", 1.47}, {"polycarbonate", 1.585}, {"sapphire", 1.77}};
-
-      auto it = indices.find(Lower(material));
-      if (it != indices.end()) {
-        return it->second;
-      }
-      std::istringstream stream(material);
-      double value;
-      if (!(stream >> value) || !(stream >> std::ws).eof() || value < 1.0 || value > 3.0) {
-        std::string names;
-        for (const auto& [name, index] : indices) {
-          names += (names.empty() ? "" : ", ") + name;
-        }
-        throw std::runtime_error("Unknown material '" + material + "', use a refractive index or one of: " + names);
-      }
-      return value;
-    }
-
     ImportedHousing ParseHousing(const std::string& content) {
       Values values = simple_yaml::Parse(content);
       ImportedHousing housing;
