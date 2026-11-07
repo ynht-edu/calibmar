@@ -1,6 +1,7 @@
 #include "calibmar/calibrators/basic_calibrator.h"
 #include "calibmar/calibrators/housing_calibrator.h"
 #include "calibmar/core/camera_import.h"
+#include "calibmar/core/housing_import.h"
 #include "calibmar/core/report.h"
 #include "calibmar/extractors/aprilgrid.h"
 #include "calibmar/readers/filesystem_reader.h"
@@ -79,7 +80,7 @@ int main(int argc, char* argv[]) {
   std::setlocale(LC_ALL, "C");
 
   std::string images_dir, target_file, camera_model = "OPENCV", output_file = "calibration.txt";
-  std::string intrinsics_file, camera_selection, housing, housing_params;
+  std::string intrinsics_file, camera_selection, housing, housing_params, housing_file;
   int min_points = 8;
 
   po::options_description desc("Calibrate a camera, optionally with an underwater housing, from images of a Kalibr AprilGrid");
@@ -96,6 +97,9 @@ int main(int argc, char* argv[]) {
       "--camera_model. Used as initial guess, or kept fixed with --housing")(
       "camchain", po::value(&intrinsics_file), "Same as --intrinsics")(
       "cam", po::value(&camera_selection), "Camera in the intrinsics file by name (cam1, Camera2) or index. Default: first")(
+      "housing_file,H", po::value(&housing_file),
+      "Housing yaml (housing, thickness, glass, water, ...) or a previous calibmar housing calibration yaml. "
+      "Requires --intrinsics")(
       "housing", po::value(&housing), "Housing model, FLATPORT or DOMEPORT. Requires --intrinsics")(
       "housing_params", po::value(&housing_params),
       "Initial housing parameters, comma separated.\n"
@@ -125,6 +129,26 @@ int main(int argc, char* argv[]) {
     reader_options.image_directory = images_dir;
     FilesystemImageReader reader(reader_options);
     std::pair<int, int> image_size = {reader.ImagesWidth(), reader.ImagesHeight()};
+
+    std::vector<double> initial_housing_params;
+    if (!housing_file.empty()) {
+      if (!housing.empty() || !housing_params.empty()) {
+        throw std::runtime_error("Use either --housing_file or --housing/--housing_params");
+      }
+      housing_import::ImportedHousing imported = housing_import::ReadHousing(housing_file);
+      housing = HousingInterface::HousingInterfaces().at(imported.housing_interface).model_name;
+      initial_housing_params = imported.params;
+    }
+    else if (!housing.empty()) {
+      initial_housing_params = ParseParams(housing_params);
+    }
+    if (!housing.empty()) {
+      std::cout << "Housing: " << housing << " [";
+      for (size_t i = 0; i < initial_housing_params.size(); i++) {
+        std::cout << (i ? ", " : "") << initial_housing_params[i];
+      }
+      std::cout << "]\n";
+    }
 
     std::optional<camera_import::ImportedCamera> camera;
     if (!intrinsics_file.empty()) {
@@ -181,7 +205,7 @@ int main(int argc, char* argv[]) {
       calibrator_options.camera_model = camera->camera_model;
       calibrator_options.camera_params = camera->params;
       calibrator_options.housing_interface = HousingFromName(housing);
-      calibrator_options.initial_housing_params = ParseParams(housing_params);
+      calibrator_options.initial_housing_params = initial_housing_params;
       calibrator_options.estimate_initial_dome_offset = false;
       calibrator_options.image_size = image_size;
       calibrator = std::make_unique<HousingCalibrator>(calibrator_options);

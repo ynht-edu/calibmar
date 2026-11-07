@@ -9,7 +9,11 @@ target_sources(calibmar PRIVATE
 	pixmap.cpp
 	pixmap.h
 	camera_models.h
+	housing_import.cpp
+	housing_import.h
 	report.cpp
 	report.h
+	simple_yaml.cpp
+	simple_yaml.h
 	undistort.cpp
 	undistort.h)

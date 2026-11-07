@@ -17,6 +17,8 @@ namespace calibmar {
     void SetHousingOptions(const std::optional<std::pair<HousingInterfaceType, std::string>>& options);
 
    private:
+    void LoadHousingYaml();
+
     HousingWidget* housing_model_;
     QLabel* housing_parameters_label_;
     QLineEdit* initial_parameters_edit_;
