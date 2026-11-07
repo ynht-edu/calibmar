@@ -45,16 +45,16 @@ namespace calibmar {
     QLabel* marker_size_label = new QLabel(this);
     marker_size_label->setText("Marker Size");
     marker_size_edit_ = new QDoubleSpinBox(this);
-    marker_size_edit_->setDecimals(3);
-    marker_size_edit_->setRange(0.001, 1000);
+    marker_size_edit_->setDecimals(5);
+    marker_size_edit_->setRange(0.00001, 1000);
     marker_size_edit_->setSingleStep(0.001);
     marker_size_edit_->setValue(1.0);
 
     QLabel* spacing_size_label = new QLabel(this);
     spacing_size_label->setText("Marker Spacing");
     spacing_size_edit_ = new QDoubleSpinBox(this);
-    spacing_size_edit_->setDecimals(3);
-    spacing_size_edit_->setRange(0.001, 1000);
+    spacing_size_edit_->setDecimals(5);
+    spacing_size_edit_->setRange(0.00001, 1000);
     spacing_size_edit_->setSingleStep(0.001);
     spacing_size_edit_->setValue(1.0);
     spacing_size_edit_->setToolTip("Absolute gap between markers. For a Kalibr AprilGrid this is tagSize * tagSpacing.");
