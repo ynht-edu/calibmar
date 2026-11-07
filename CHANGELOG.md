@@ -5,6 +5,7 @@
 ### New Features
 
 - Kalibr AprilGrid support for marker grid boards: layout preset and `target.yaml` import
+- `calibmar_cli` for calibrating from an image directory and a Kalibr AprilGrid `target.yaml` without the GUI
 
 ## 1.1.0
 

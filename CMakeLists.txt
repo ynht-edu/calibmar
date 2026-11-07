@@ -21,6 +21,7 @@ endif()
 add_subdirectory(lib)
 add_subdirectory(src/app)
 add_subdirectory(src/calibmar)
+add_subdirectory(src/cli)
 
 if(CALIBMAR_TESTS_ENABLED) 
   enable_testing()
